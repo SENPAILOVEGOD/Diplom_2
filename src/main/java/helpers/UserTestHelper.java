@@ -5,8 +5,6 @@ import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import models.User;
 
-import java.util.UUID;
-
 import static org.apache.http.HttpStatus.SC_OK;
 
 public class UserTestHelper {
@@ -21,16 +19,13 @@ public class UserTestHelper {
         this.userClient = userClient;
     }
 
-    private String generateUniqueEmail() {
-        return "test_" + UUID.randomUUID().toString().substring(0, 8) + "@yandex.ru";
-    }
 
     @Step("Создаем уникального пользователя")
-    public UserCreationResult createUniqueUser(String password, String name) {
+    public UserCreationResult createUniqueUser() {
         User user = User.builder()
-                .email(generateUniqueEmail())
-                .password(password)
-                .name(name)
+                .email(TestDataGenerator.uniqueEmail())
+                .password(DEFAULT_PASSWORD)
+                .name(DEFAULT_NAME)
                 .build();
 
         Response response = userClient.register(user);
@@ -63,7 +58,7 @@ public class UserTestHelper {
     @Step("Создаем пользователя без password (заполнены email и name)")
     public Response createUserWithoutPassword() {
         User user = User.builder()
-                .email(generateUniqueEmail())
+                .email(TestDataGenerator.uniqueEmail())
                 .name(DEFAULT_NAME)
                 .build();
         return userClient.register(user);
@@ -72,7 +67,7 @@ public class UserTestHelper {
     @Step("Создаем пользователя без name (заполнены email и password)")
     public Response createUserWithoutName() {
         User user = User.builder()
-                .email(generateUniqueEmail())
+                .email(TestDataGenerator.uniqueEmail())
                 .password(DEFAULT_PASSWORD)
                 .build();
         return userClient.register(user);
@@ -87,5 +82,28 @@ public class UserTestHelper {
         } finally {
             createdUserToken = null;
         }
+    }
+
+    @Step("Авторизуемся под существующим пользователем")
+    public Response loginAs(User user) {
+        return userClient.login(user);
+    }
+
+    @Step("Авторизуемся с несуществующими email и паролем")
+    public Response loginWithInvalidCredentials(String email, String password) {
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .build();
+        return userClient.login(user);
+    }
+
+    @Step("Авторизуемся с неверным паролем")
+    public Response loginWithWrongPassword(String email, String password) {
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .build();
+        return userClient.login(user);
     }
 }

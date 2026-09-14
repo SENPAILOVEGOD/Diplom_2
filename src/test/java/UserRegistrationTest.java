@@ -34,8 +34,8 @@ public class UserRegistrationTest {
     @DisplayName("POST /api/auth/register Успешное создание уникального пользователя")
     @Description("Можно создать нового пользователя с уникальными данными")
     public void testCreateUniqueUserSuccess() {
-        UserCreationResult result = userTestHelper.createUniqueUser("password123", "Username");
-        UserAssertions.assertSuccess(result.getResponse());
+        UserCreationResult result = userTestHelper.createUniqueUser();
+        UserAssertions.assertSuccess(result.getResponse(), true);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class UserRegistrationTest {
     @DisplayName("POST /api/auth/register Создание уже зарегистрированного пользователя")
     @Description("Повторная регистрация возвращает 403 Forbidden")
     public void testCreateAlreadyRegisteredUser() {
-        UserCreationResult existing = userTestHelper.createUniqueUser("password123", "Username");
+        UserCreationResult existing = userTestHelper.createUniqueUser();
 
         Response duplicate = userTestHelper.createDuplicateUser(existing.getUser());
         UserAssertions.assertError(duplicate, SC_FORBIDDEN, "User already exists");
